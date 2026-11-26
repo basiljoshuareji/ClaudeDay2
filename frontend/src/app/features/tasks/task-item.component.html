@@ -1,0 +1,173 @@
+<div class="row">
+  @if (reorderable()) {
+    <button
+      type="button"
+      class="handle"
+      cdkDragHandle
+      aria-label="Reorder task. Drag, or hold Alt and press the up or down arrow."
+      title="Drag to reorder (or Alt + ↑/↓)"
+      (keydown)="onHandleKey($event)"
+    >
+      <app-icon name="grip" />
+    </button>
+  }
+
+  @if (selectMode()) {
+    <input
+      type="checkbox"
+      class="select-box"
+      [checked]="selected()"
+      [attr.aria-label]="'Select task: ' + task().title"
+      (change)="selectionChange.emit({ task: task(), checked: $any($event.target).checked })"
+    />
+  }
+
+  <button
+    type="button"
+    class="check"
+    role="checkbox"
+    [attr.aria-checked]="done()"
+    [attr.aria-label]="(done() ? 'Mark as not done: ' : 'Mark as done: ') + task().title"
+    (click)="toggleComplete.emit(task())"
+  >
+    @if (done()) {
+      <app-icon name="check" [size]="16" />
+    }
+  </button>
+
+  <div class="body">
+    <button type="button" class="title" (click)="edit.emit(task())">
+      {{ task().title }}
+    </button>
+
+    @if (task().description) {
+      <p class="desc">{{ task().description }}</p>
+    }
+
+    <div class="meta">
+      @if (due(); as label) {
+        <span class="chip" [class.chip--danger]="overdue()">
+          <app-icon [name]="overdue() ? 'alert' : 'calendar'" [size]="13" />
+          @if (overdue()) {
+            <span class="sr-only">Overdue:</span>
+          } @else {
+            <span class="sr-only">Due:</span>
+          }
+          {{ label }}
+        </span>
+      }
+
+      <span
+        class="chip"
+        [class.chip--danger]="task().priority === 'High'"
+        [class.chip--warning]="task().priority === 'Medium'"
+        [class.chip--primary]="task().priority === 'Low'"
+      >
+        <app-icon [name]="priorityIcon" [size]="13" />
+        <span class="sr-only">Priority:</span>
+        {{ task().priority }}
+      </span>
+
+      @if (task().status === 'InProgress') {
+        <span class="chip chip--success"><app-icon name="clock" [size]="13" /> In progress</span>
+      }
+
+      @if (showSection() && sectionOf(); as section) {
+        <span class="chip">
+          <span class="dot" [style.background]="section.color"></span>
+          {{ section.name }}
+        </span>
+      }
+
+      @for (tag of task().tags; track tag.id) {
+        <span class="chip tag">
+          <span class="dot" [style.background]="tag.color"></span>
+          {{ tag.name }}
+        </span>
+      }
+
+      @if (task().subTasks.length > 0) {
+        <button
+          type="button"
+          class="chip chip-button"
+          [attr.aria-expanded]="expanded()"
+          [attr.aria-controls]="'subtasks-' + task().id"
+          (click)="expanded.set(!expanded())"
+        >
+          <app-icon name="list-check" [size]="13" />
+          {{ subDone() }}/{{ task().subTasks.length }}
+          <span class="sr-only">checklist items done</span>
+          <app-icon [name]="expanded() ? 'chevron-down' : 'chevron-right'" [size]="13" />
+        </button>
+      } @else {
+        <button type="button" class="chip chip-button chip-button--ghost" (click)="expanded.set(!expanded())" [attr.aria-expanded]="expanded()">
+          <app-icon name="plus" [size]="13" /> Checklist
+        </button>
+      }
+    </div>
+
+    @if (expanded()) {
+      <div class="subtasks fade-in" [id]="'subtasks-' + task().id">
+        @if (task().subTasks.length > 0) {
+          <app-progress-bar [done]="subDone()" [total]="task().subTasks.length" label="Checklist progress" />
+        }
+        <ul class="sub-list">
+          @for (sub of task().subTasks; track sub.id) {
+            <li>
+              <label class="sub">
+                <input
+                  type="checkbox"
+                  [checked]="sub.isCompleted"
+                  (change)="onSubTaskChange(sub, $any($event.target).checked)"
+                />
+                <span [class.sub--done]="sub.isCompleted">{{ sub.title }}</span>
+              </label>
+            </li>
+          }
+        </ul>
+        <form class="sub-add" (submit)="$event.preventDefault(); submitSubTask(subInput)">
+          <input #subInput class="input" maxlength="200" placeholder="Add a checklist item" [attr.aria-label]="'Add checklist item to ' + task().title" />
+          <button type="submit" class="btn btn--sm">Add</button>
+        </form>
+      </div>
+    }
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn btn--ghost btn--icon btn--sm" [attr.aria-label]="'Edit ' + task().title" title="Edit" (click)="edit.emit(task())">
+      <app-icon name="edit" />
+    </button>
+    <button type="button" class="btn btn--ghost btn--icon btn--sm danger" [attr.aria-label]="'Delete ' + task().title" title="Delete" (click)="remove.emit(task())">
+      <app-icon name="trash" />
+    </button>
+    <div class="menu-wrap">
+      <button
+        type="button"
+        class="btn btn--ghost btn--icon btn--sm menu-btn"
+        aria-haspopup="menu"
+        [attr.aria-expanded]="menuOpen()"
+        [attr.aria-label]="'More actions for ' + task().title"
+        (click)="toggleMenu($event)"
+      >
+        <app-icon name="more" />
+      </button>
+      @if (menuOpen()) {
+        <div class="menu card fade-in" role="menu">
+          @if (reorderable()) {
+            <button type="button" role="menuitem" (click)="reorder(-1)"><app-icon name="arrow-up" [size]="16" /> Move up</button>
+            <button type="button" role="menuitem" (click)="reorder(1)"><app-icon name="arrow-down" [size]="16" /> Move down</button>
+          }
+          @if (otherSections().length > 0) {
+            <span class="menu__heading">Move to section</span>
+            @for (section of otherSections(); track section.id) {
+              <button type="button" role="menuitem" (click)="moveTo(section.id)">
+                <span class="dot" [style.background]="section.color"></span>
+                {{ section.name }}
+              </button>
+            }
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

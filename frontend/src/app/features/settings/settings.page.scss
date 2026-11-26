@@ -1,0 +1,106 @@
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sub {
+  color: var(--text-muted);
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+}
+
+.block > .btn {
+  align-self: flex-start;
+}
+
+.account {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+
+  div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+  }
+
+  dt {
+    width: 70px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.add {
+  display: flex;
+  gap: 8px;
+}
+
+.color-pick {
+  position: relative;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    inset: -6px;
+    width: calc(100% + 12px);
+    height: calc(100% + 12px);
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    background: transparent;
+  }
+
+  &:focus-within {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+.tags {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tag-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .count {
+    flex: none;
+    min-width: 64px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: right;
+  }
+
+  .danger:hover {
+    color: var(--danger);
+    background: var(--danger-soft);
+  }
+}
+
+@media (max-width: 520px) {
+  .tag-row .count {
+    display: none;
+  }
+}

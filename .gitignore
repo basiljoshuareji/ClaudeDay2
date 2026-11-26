@@ -1,0 +1,29 @@
+# .NET
+bin/
+obj/
+*.user
+*.db
+*.db-shm
+*.db-wal
+logs/
+TestResults/
+.vs/
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+.sass-cache/
+*.tsbuildinfo
+coverage/
+
+# Editors / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
+.DS_Store
+
+# Secrets
+.env
+*.pfx

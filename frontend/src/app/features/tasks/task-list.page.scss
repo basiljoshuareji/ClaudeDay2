@@ -1,0 +1,266 @@
+:host {
+  display: block;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 96px;
+}
+
+// ----------------------------------------------------------------- header
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 16px;
+  align-items: center;
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  &__icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    color: var(--section-color);
+    background: color-mix(in srgb, var(--section-color, var(--primary)) 18%, transparent);
+  }
+
+  &__text {
+    min-width: 0;
+
+    h1 {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &__sub {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  &__progress {
+    grid-column: 1 / -1;
+  }
+}
+
+// -------------------------------------------------------------- quick add
+.quick {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+
+  &__input {
+    flex: 1;
+    border-color: var(--border);
+  }
+
+  &__section {
+    width: auto;
+    max-width: 160px;
+  }
+}
+
+// ---------------------------------------------------------------- toolbar
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .search {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    app-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .input {
+      padding-left: 38px;
+    }
+  }
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    min-height: 32px;
+  }
+}
+
+.due-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.due-tab {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-weight: 600;
+
+  &:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  &.is-active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--on-primary);
+  }
+}
+
+.selects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .select {
+    width: auto;
+    min-width: 130px;
+    flex: 1 1 130px;
+  }
+}
+
+.sort {
+  display: flex;
+  gap: 6px;
+  flex: 1 1 240px;
+
+  .select {
+    flex: 1;
+  }
+}
+
+.select-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+  }
+}
+
+.hint-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+// ------------------------------------------------------------------- list
+.retry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: opacity 0.15s;
+
+  &.is-dimmed {
+    opacity: 0.6;
+  }
+}
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .skeleton {
+    height: 78px;
+    border-radius: 12px;
+  }
+}
+
+.load-more {
+  display: block;
+  margin: 14px auto 0;
+}
+
+// --------------------------------------------------------------- bulk bar
+.bulk {
+  position: fixed;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 70;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 16px;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  padding: 10px 14px;
+  box-shadow: var(--shadow-lg);
+
+  &__count {
+    font-weight: 700;
+  }
+
+  &__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 640px) {
+  .head {
+    grid-template-columns: minmax(0, 1fr);
+
+    &__actions {
+      justify-content: flex-start;
+    }
+  }
+
+  .quick {
+    flex-wrap: wrap;
+
+    &__input {
+      flex: 1 1 100%;
+    }
+  }
+
+  .hint-text {
+    display: none;
+  }
+}

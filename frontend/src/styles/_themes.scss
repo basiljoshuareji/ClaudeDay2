@@ -1,0 +1,149 @@
+// ---------------------------------------------------------------------------
+// Theme system: every colour in the app is a CSS custom property defined here.
+// A theme is activated by setting  <html data-theme="ocean">  at runtime (see ThemeService).
+// Components never hardcode colours; they only read these tokens.
+//
+// All text/background pairs below were checked against WCAG AA (4.5:1 for text, 3:1 for UI):
+// run `node scripts/check-contrast.mjs` to re-verify after editing a palette.
+// ---------------------------------------------------------------------------
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --surface-2: #eef1f8;
+  --border: #d3d9e6;
+  --border-strong: #76829c;
+  --text: #0f172a;
+  --text-muted: #475569;
+  --primary: #4338ca;
+  --primary-hover: #3730a3;
+  --on-primary: #ffffff;
+  --primary-soft: #e8e8fb;
+  --accent: #be185d;
+  --danger: #b91c1c;
+  --danger-soft: #fde8e8;
+  --success: #166534;
+  --success-soft: #dcf5e4;
+  --warning: #92400e;
+  --warning-soft: #fdf0cf;
+  --prio-high: #b91c1c;
+  --prio-medium: #92400e;
+  --prio-low: #0369a1;
+  --overlay: rgba(15, 23, 42, 0.5);
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 14px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 10px 40px rgba(15, 23, 42, 0.22);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0b1020;
+  --surface: #141b30;
+  --surface-2: #1c2542;
+  --border: #2c3860;
+  --border-strong: #7683a8;
+  --text: #e8ecf7;
+  --text-muted: #a6b1d1;
+  --primary: #8b93fa;
+  --primary-hover: #a5abfc;
+  --on-primary: #0b1020;
+  --primary-soft: #262e5c;
+  --accent: #f472b6;
+  --danger: #f87171;
+  --danger-soft: #3d1a22;
+  --success: #4ade80;
+  --success-soft: #12331f;
+  --warning: #fbbf24;
+  --warning-soft: #3b2e0c;
+  --prio-high: #f87171;
+  --prio-medium: #fbbf24;
+  --prio-low: #38bdf8;
+  --overlay: rgba(2, 4, 12, 0.7);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme='ocean'] {
+  color-scheme: light;
+  --bg: #e7f2fa;
+  --surface: #ffffff;
+  --surface-2: #dcecf8;
+  --border: #b6d2e8;
+  --border-strong: #5f86a6;
+  --text: #0a2540;
+  --text-muted: #3a5a76;
+  --primary: #0369a1;
+  --primary-hover: #075985;
+  --on-primary: #ffffff;
+  --primary-soft: #d6ecfa;
+  --accent: #0e7490;
+  --danger: #b91c1c;
+  --danger-soft: #fde8e8;
+  --success: #0f766e;
+  --success-soft: #d5f3ee;
+  --warning: #92400e;
+  --warning-soft: #fdf0cf;
+  --prio-high: #b91c1c;
+  --prio-medium: #92400e;
+  --prio-low: #0369a1;
+  --overlay: rgba(8, 37, 64, 0.5);
+  --shadow: 0 1px 2px rgba(8, 47, 73, 0.07), 0 4px 14px rgba(8, 47, 73, 0.1);
+  --shadow-lg: 0 10px 40px rgba(8, 47, 73, 0.25);
+}
+
+[data-theme='forest'] {
+  color-scheme: light;
+  --bg: #ecf4ec;
+  --surface: #fbfdfb;
+  --surface-2: #dfeedf;
+  --border: #b9d3b9;
+  --border-strong: #5f8a68;
+  --text: #11271a;
+  --text-muted: #435e4b;
+  --primary: #166534;
+  --primary-hover: #14532d;
+  --on-primary: #ffffff;
+  --primary-soft: #d8efdc;
+  --accent: #854d0e;
+  --danger: #b91c1c;
+  --danger-soft: #fde8e8;
+  --success: #166534;
+  --success-soft: #d8efdc;
+  --warning: #854d0e;
+  --warning-soft: #f8edc8;
+  --prio-high: #b91c1c;
+  --prio-medium: #854d0e;
+  --prio-low: #0f766e;
+  --overlay: rgba(10, 36, 20, 0.5);
+  --shadow: 0 1px 2px rgba(20, 60, 30, 0.07), 0 4px 14px rgba(20, 60, 30, 0.1);
+  --shadow-lg: 0 10px 40px rgba(20, 60, 30, 0.25);
+}
+
+[data-theme='sunset'] {
+  color-scheme: light;
+  --bg: #fff3ec;
+  --surface: #ffffff;
+  --surface-2: #ffe6da;
+  --border: #f0c8b6;
+  --border-strong: #b07a6a;
+  --text: #3a1020;
+  --text-muted: #704455;
+  --primary: #c2410c;
+  --primary-hover: #9a3412;
+  --on-primary: #ffffff;
+  --primary-soft: #fff0e6;
+  --accent: #be185d;
+  --danger: #be123c;
+  --danger-soft: #fde4ea;
+  --success: #166534;
+  --success-soft: #dcf5e4;
+  --warning: #92400e;
+  --warning-soft: #fdecc8;
+  --prio-high: #be123c;
+  --prio-medium: #92400e;
+  --prio-low: #0369a1;
+  --overlay: rgba(58, 16, 32, 0.5);
+  --shadow: 0 1px 2px rgba(120, 40, 20, 0.08), 0 4px 14px rgba(120, 40, 20, 0.1);
+  --shadow-lg: 0 10px 40px rgba(120, 40, 20, 0.28);
+}

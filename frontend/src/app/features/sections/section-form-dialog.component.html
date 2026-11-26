@@ -1,0 +1,92 @@
+<div class="dialog-backdrop" (mousedown)="onBackdrop($event)" (keydown.escape)="close()">
+  <form
+    class="dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="section-dialog-title"
+    cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true"
+    [formGroup]="form"
+    (ngSubmit)="save()"
+    novalidate
+  >
+    <div class="dialog__header">
+      <h2 id="section-dialog-title">{{ isEdit() ? 'Edit section' : 'New section' }}</h2>
+      <button type="button" class="btn btn--ghost btn--icon btn--sm" aria-label="Close" (click)="close()">
+        <app-icon name="x" />
+      </button>
+    </div>
+
+    <div class="dialog__body">
+      @if (serverError(); as message) {
+        <div class="form-error" role="alert">{{ message }}</div>
+      }
+
+      <div class="preview" aria-hidden="true">
+        <span class="preview__icon" [style.--section-color]="previewColor()">
+          <app-icon [name]="previewIcon()" [size]="22" />
+        </span>
+        <span class="preview__name">{{ previewName().trim() || 'Section name' }}</span>
+      </div>
+
+      <div class="field">
+        <label for="section-name">Name</label>
+        <input
+          id="section-name"
+          class="input"
+          formControlName="name"
+          maxlength="100"
+          autocomplete="off"
+          placeholder="e.g. Fitness, Side projects"
+          cdkFocusInitial
+          (input)="onNameInput()"
+          [attr.aria-invalid]="(name.invalid && name.touched) || !!nameServerError()"
+          aria-describedby="section-name-error"
+        />
+        <div id="section-name-error" aria-live="polite">
+          @if (nameServerError(); as message) {
+            <span class="field-error">{{ message }}</span>
+          } @else if (name.touched && name.invalid) {
+            <span class="field-error">Give the section a name.</span>
+          }
+        </div>
+      </div>
+
+      <fieldset class="field fieldset">
+        <legend class="label">Colour</legend>
+        <div class="swatches">
+          @for (c of colors; track c) {
+            <label class="swatch" [style.--swatch]="c" [class.is-selected]="form.controls.color.value === c">
+              <input type="radio" class="sr-only" name="section-color" [value]="c" [checked]="form.controls.color.value === c" (change)="pick('color', c)" />
+              <span class="sr-only">{{ c }}</span>
+            </label>
+          }
+          <label class="swatch swatch--custom" title="Custom colour">
+            <span class="sr-only">Custom colour</span>
+            <input type="color" [value]="form.controls.color.value" (input)="pick('color', $any($event.target).value)" />
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="field fieldset">
+        <legend class="label">Icon</legend>
+        <div class="icons">
+          @for (name of icons; track name) {
+            <label class="icon-option" [class.is-selected]="form.controls.icon.value === name" [title]="name">
+              <input type="radio" class="sr-only" name="section-icon" [value]="name" [checked]="form.controls.icon.value === name" (change)="pick('icon', name)" />
+              <span class="sr-only">{{ name }}</span>
+              <app-icon [name]="name" [size]="20" />
+            </label>
+          }
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="dialog__footer">
+      <button type="button" class="btn" (click)="close()">Cancel</button>
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : isEdit() ? 'Save changes' : 'Create section' }}
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,149 @@
+<div class="dialog-backdrop" (mousedown)="onBackdrop($event)" (keydown.escape)="close()">
+  <form
+    class="dialog dialog--wide"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="task-dialog-title"
+    cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true"
+    [formGroup]="form"
+    (ngSubmit)="save()"
+    novalidate
+  >
+    <div class="dialog__header">
+      <h2 id="task-dialog-title">{{ isEdit ? 'Edit task' : 'New task' }}</h2>
+      <button type="button" class="btn btn--ghost btn--icon btn--sm" aria-label="Close" (click)="close()">
+        <app-icon name="x" />
+      </button>
+    </div>
+
+    <div class="dialog__body">
+      @if (serverError(); as message) {
+        <div class="form-error" role="alert">{{ message }}</div>
+      }
+
+      <div class="field">
+        <label for="task-title">Title</label>
+        <input
+          id="task-title"
+          class="input"
+          formControlName="title"
+          maxlength="200"
+          autocomplete="off"
+          placeholder="What needs doing?"
+          cdkFocusInitial
+          [attr.aria-invalid]="(title.invalid && title.touched) || !!serverFieldError('title')"
+          aria-describedby="task-title-error"
+        />
+        <div id="task-title-error" aria-live="polite">
+          @if (serverFieldError('title'); as message) {
+            <span class="field-error">{{ message }}</span>
+          } @else if (title.touched && title.invalid) {
+            <span class="field-error">
+              @if (title.errors?.['maxlength']) { Keep the title under 200 characters. } @else { A title is required. }
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="task-description">Notes</label>
+        <textarea id="task-description" class="textarea" formControlName="description" maxlength="4000" placeholder="Details, links, anything useful…"></textarea>
+        @if (description.touched && description.errors?.['maxlength']) {
+          <span class="field-error">Notes can be up to 4000 characters.</span>
+        }
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="task-section">Section</label>
+          <select id="task-section" class="select" formControlName="sectionId" [attr.aria-invalid]="!!serverFieldError('sectionId')">
+            @for (section of sections(); track section.id) {
+              <option [ngValue]="section.id">{{ section.name }}</option>
+            }
+          </select>
+          @if (serverFieldError('sectionId'); as message) {
+            <span class="field-error">{{ message }}</span>
+          }
+        </div>
+
+        <div class="field">
+          <label for="task-due">Due date</label>
+          <input id="task-due" class="input" type="date" formControlName="dueDate" />
+        </div>
+
+        <div class="field">
+          <label for="task-status">Status</label>
+          <select id="task-status" class="select" formControlName="status">
+            @for (s of statuses; track s.value) {
+              <option [value]="s.value">{{ s.label }}</option>
+            }
+          </select>
+        </div>
+
+        <fieldset class="field fieldset">
+          <legend class="label">Priority</legend>
+          <div class="seg" role="radiogroup" aria-label="Priority">
+            @for (p of priorities; track p) {
+              <label class="seg__item" [attr.data-priority]="p">
+                <input type="radio" class="sr-only" formControlName="priority" [value]="p" />
+                <span>{{ p }}</span>
+              </label>
+            }
+          </div>
+        </fieldset>
+      </div>
+
+      <fieldset class="field fieldset">
+        <legend class="label">Tags</legend>
+        <div class="tag-list">
+          @for (tag of tagsStore.tags(); track tag.id) {
+            <button type="button" class="chip tag-toggle" [class.is-on]="isTagSelected(tag.id)" [attr.aria-pressed]="isTagSelected(tag.id)" (click)="toggleTag(tag.id)">
+              <span class="dot" [style.background]="tag.color"></span>
+              {{ tag.name }}
+              @if (isTagSelected(tag.id)) {
+                <app-icon name="check" [size]="12" />
+              }
+            </button>
+          }
+          @if (tagsStore.tags().length === 0) {
+            <span class="hint">No tags yet. Create one below.</span>
+          }
+        </div>
+        <div class="inline-add">
+          <input #tagInput class="input" maxlength="50" placeholder="New tag name" aria-label="New tag name" (keydown.enter)="createTag(tagInput, $event)" />
+          <button type="button" class="btn btn--sm" [disabled]="creatingTag()" (click)="createTag(tagInput)">Add tag</button>
+        </div>
+        @if (tagError(); as message) {
+          <span class="field-error" role="alert">{{ message }}</span>
+        }
+      </fieldset>
+
+      <fieldset class="field fieldset">
+        <legend class="label">Checklist</legend>
+        <ul class="checklist" formArrayName="subTasks">
+          @for (group of subTasks.controls; track group; let i = $index) {
+            <li [formGroupName]="i" class="checklist__row">
+              <input type="checkbox" formControlName="isCompleted" [attr.aria-label]="'Item ' + (i + 1) + ' done'" />
+              <input class="input" formControlName="title" maxlength="200" [attr.aria-label]="'Checklist item ' + (i + 1)" />
+              <button type="button" class="btn btn--ghost btn--icon btn--sm" [attr.aria-label]="'Remove checklist item ' + (i + 1)" (click)="removeSubTask(i)">
+                <app-icon name="x" [size]="16" />
+              </button>
+            </li>
+          }
+        </ul>
+        <div class="inline-add">
+          <input #subInput class="input" maxlength="200" placeholder="Add a checklist item" aria-label="New checklist item" (keydown.enter)="addFromInput(subInput, $event)" />
+          <button type="button" class="btn btn--sm" (click)="addFromInput(subInput)">Add item</button>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="dialog__footer">
+      <button type="button" class="btn" (click)="close()">Cancel</button>
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : isEdit ? 'Save changes' : 'Add task' }}
+      </button>
+    </div>
+  </form>
+</div>

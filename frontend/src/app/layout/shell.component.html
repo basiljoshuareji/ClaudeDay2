@@ -1,0 +1,112 @@
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<div class="shell" [class.is-collapsed]="layout.collapsed()" [class.is-open]="layout.mobileOpen()">
+  <aside id="sidebar" class="sidebar" aria-label="Sidebar">
+    <div class="sidebar__head">
+      <a class="brand" routerLink="/all" aria-label="Todo home">
+        <span class="brand__logo"><app-icon name="list-check" [size]="22" /></span>
+        <span class="brand__name label">Todo</span>
+      </a>
+      <button
+        type="button"
+        class="btn btn--ghost btn--icon btn--sm collapse-btn"
+        [attr.aria-label]="layout.collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+        [attr.aria-expanded]="!layout.collapsed()"
+        (click)="layout.toggleCollapsed()"
+      >
+        <app-icon [name]="layout.collapsed() ? 'chevrons-right' : 'chevrons-left'" />
+      </button>
+      <button type="button" class="btn btn--ghost btn--icon btn--sm close-btn" aria-label="Close menu" (click)="layout.closeMobile()">
+        <app-icon name="x" />
+      </button>
+    </div>
+
+    <nav class="nav" aria-label="Task lists">
+      <a
+        class="nav__item"
+        routerLink="/all"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+        [attr.title]="layout.collapsed() ? 'All tasks' : null"
+      >
+        <span class="nav__icon" style="--section-color: var(--primary)"><app-icon name="layers" /></span>
+        <span class="nav__label label">All tasks</span>
+        <span class="nav__count label">{{ sections.totals().pending }}</span>
+      </a>
+
+      <h2 class="nav__heading label">Sections</h2>
+
+      @if (!sections.loaded()) {
+        @for (i of [1, 2]; track i) {
+          <span class="skeleton nav__skeleton"></span>
+        }
+      }
+
+      @for (section of sections.sections(); track section.id) {
+        <a
+          class="nav__item"
+          [routerLink]="['/sections', section.id]"
+          routerLinkActive="is-active"
+          ariaCurrentWhenActive="page"
+          [attr.title]="layout.collapsed() ? section.name : null"
+        >
+          <span class="nav__icon" [style.--section-color]="section.color"><app-icon [name]="section.icon" /></span>
+          <span class="nav__label label">{{ section.name }}</span>
+          <span class="nav__count label" [attr.aria-label]="section.pendingCount + ' open tasks'">{{ section.pendingCount }}</span>
+        </a>
+      }
+
+      <button type="button" class="nav__item nav__add" (click)="sectionDialog.openCreate()" [attr.title]="layout.collapsed() ? 'New section' : null">
+        <span class="nav__icon"><app-icon name="plus" /></span>
+        <span class="nav__label label">New section</span>
+      </button>
+    </nav>
+
+    <div class="sidebar__foot">
+      <a class="nav__item" routerLink="/settings" routerLinkActive="is-active" ariaCurrentWhenActive="page" [attr.title]="layout.collapsed() ? 'Settings' : null">
+        <span class="nav__icon"><app-icon name="settings" /></span>
+        <span class="nav__label label">Settings</span>
+      </a>
+      <div class="user">
+        <span class="user__avatar" aria-hidden="true">{{ initial }}</span>
+        <span class="user__info label">
+          <span class="user__name">{{ auth.user()?.displayName }}</span>
+          <span class="user__email">{{ auth.user()?.email }}</span>
+        </span>
+        <button type="button" class="btn btn--ghost btn--icon btn--sm" aria-label="Sign out" title="Sign out" (click)="auth.logout()">
+          <app-icon name="logout" />
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="scrim" (click)="layout.closeMobile()" aria-hidden="true"></div>
+
+  <div class="content">
+    <header class="topbar">
+      <button
+        type="button"
+        class="btn btn--ghost btn--icon menu-btn"
+        aria-label="Open menu"
+        aria-controls="sidebar"
+        [attr.aria-expanded]="layout.mobileOpen()"
+        (click)="layout.openMobile()"
+      >
+        <app-icon name="menu" [size]="22" />
+      </button>
+      <span class="topbar__spacer"></span>
+      <app-theme-menu />
+    </header>
+
+    <main id="main-content" class="main" tabindex="-1">
+      <router-outlet />
+    </main>
+  </div>
+</div>
+
+<app-toast-container />
+<app-confirm-dialog />
+
+@if (sectionDialog.state()) {
+  <app-section-form-dialog [section]="editingSection()" />
+}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <title>Todo</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="A themeable to-do app with sections, tags, sub-tasks and drag-and-drop ordering.">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    // Apply the saved (or OS-preferred) theme before first paint to avoid a flash of the wrong theme.
+    (function () {
+      try {
+        var themes = ['light', 'dark', 'ocean', 'forest', 'sunset'];
+        var saved = localStorage.getItem('todo.theme');
+        var theme = themes.indexOf(saved) > -1
+          ? saved
+          : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) { /* storage unavailable: keep default */ }
+    })();
+  </script>
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>

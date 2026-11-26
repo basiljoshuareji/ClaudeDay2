@@ -1,0 +1,68 @@
+<div class="settings">
+  <header>
+    <h1>Settings</h1>
+    <p class="sub">Make the app yours. Your choices are saved to your account and follow you between devices.</p>
+  </header>
+
+  <section class="card block" aria-labelledby="appearance-heading">
+    <h2 id="appearance-heading">Appearance</h2>
+    <p class="sub">Pick a theme. It applies instantly. On your first visit the app follows your device's light or dark setting.</p>
+    <app-theme-picker />
+  </section>
+
+  <section class="card block" aria-labelledby="account-heading">
+    <h2 id="account-heading">Account</h2>
+    <dl class="account">
+      <div><dt>Name</dt><dd>{{ auth.user()?.displayName }}</dd></div>
+      <div><dt>Email</dt><dd>{{ auth.user()?.email }}</dd></div>
+    </dl>
+    <button type="button" class="btn" (click)="auth.logout()"><app-icon name="logout" /> Sign out</button>
+  </section>
+
+  <section class="card block" aria-labelledby="tags-heading">
+    <h2 id="tags-heading">Tags</h2>
+    <p class="sub">Labels you can attach to any task and filter by.</p>
+
+    <form class="add" (submit)="addTag(tagInput, $event)">
+      <label class="sr-only" for="new-tag">New tag name</label>
+      <input #tagInput id="new-tag" class="input" maxlength="50" placeholder="New tag name" autocomplete="off" />
+      <label class="color-pick" title="Tag colour">
+        <span class="sr-only">Tag colour</span>
+        <input type="color" [value]="newTagColor()" (input)="newTagColor.set($any($event.target).value)" />
+      </label>
+      <button type="submit" class="btn btn--primary"><app-icon name="plus" /> Add</button>
+    </form>
+    @if (newTagError(); as message) {
+      <span class="field-error" role="alert">{{ message }}</span>
+    }
+
+    @if (!tagsStore.loaded()) {
+      <span class="skeleton" style="height: 44px"></span>
+    } @else if (tagsStore.tags().length === 0) {
+      <app-empty-state icon="tag" title="No tags yet" message="Create your first tag above, or add one while editing a task." />
+    } @else {
+      <ul class="tags">
+        @for (tag of tagsStore.tags(); track tag.id) {
+          <li class="tag-row">
+            <label class="color-pick" [title]="'Colour for ' + tag.name">
+              <span class="sr-only">Colour for {{ tag.name }}</span>
+              <input type="color" [value]="tag.color" (change)="recolor(tag, $any($event.target).value)" />
+            </label>
+            <input
+              class="input"
+              maxlength="50"
+              [value]="tag.name"
+              [attr.aria-label]="'Rename tag ' + tag.name"
+              (change)="rename(tag, $any($event.target))"
+              (keydown.enter)="$any($event.target).blur()"
+            />
+            <span class="count">{{ tag.taskCount }} task{{ tag.taskCount === 1 ? '' : 's' }}</span>
+            <button type="button" class="btn btn--ghost btn--icon btn--sm danger" [attr.aria-label]="'Delete tag ' + tag.name" (click)="remove(tag)">
+              <app-icon name="trash" />
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>

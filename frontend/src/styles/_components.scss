@@ -1,0 +1,298 @@
+// Shared, theme-aware building blocks (buttons, form controls, chips, dialogs).
+
+// ---------------------------------------------------------------- buttons
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s,
+    transform 0.1s,
+    border-color 0.15s;
+
+  &:hover:not(:disabled) {
+    background: var(--surface-2);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--on-primary);
+
+    &:hover:not(:disabled) {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+  }
+
+  &--danger {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: var(--surface);
+
+    &:hover:not(:disabled) {
+      background: var(--danger);
+      filter: brightness(0.92);
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    border-color: transparent;
+  }
+
+  &--sm {
+    min-height: 32px;
+    padding: 0 10px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+  }
+
+  &--icon {
+    width: 40px;
+    padding: 0;
+
+    &.btn--sm {
+      width: 32px;
+    }
+  }
+}
+
+// ---------------------------------------------------------------- form controls
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  > label,
+  > .label {
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  .hint {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+
+  &::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+  }
+
+  &.is-invalid,
+  &.ng-invalid.ng-touched {
+    border-color: var(--danger);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.select {
+  padding-right: 8px;
+}
+
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--danger);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.form-error {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 500;
+  border: 1px solid var(--danger);
+}
+
+// ---------------------------------------------------------------- chips and badges
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &--danger {
+    background: var(--danger-soft);
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  &--warning {
+    background: var(--warning-soft);
+    border-color: var(--warning);
+    color: var(--warning);
+  }
+
+  &--success {
+    background: var(--success-soft);
+    border-color: var(--success);
+    color: var(--success);
+  }
+
+  &--primary {
+    background: var(--primary-soft);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+}
+
+// ---------------------------------------------------------------- cards
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
+// ---------------------------------------------------------------- dialogs
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: max(16px, env(safe-area-inset-top)) 16px;
+  background: var(--overlay);
+  overflow-y: auto;
+  animation: fade-in-up 0.18s ease both;
+}
+
+.dialog {
+  width: 100%;
+  max-width: 560px;
+  margin: auto 0;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+
+  &--sm {
+    max-width: 440px;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 20px 6px;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 12px 20px 8px;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 20px 18px;
+  }
+}
+
+// ---------------------------------------------------------------- progress
+.progress {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+
+  &__bar {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--primary);
+    transition: width 0.4s ease;
+  }
+}
+
+// ---------------------------------------------------------------- CDK drag-and-drop visuals
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  opacity: 0.96;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.35;
+  background: var(--primary-soft);
+  border-radius: 12px;
+}
+
+.cdk-drag-animating {
+  transition: transform 220ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging .cdk-drag:not(.cdk-drag-placeholder) {
+  transition: transform 220ms cubic-bezier(0, 0, 0.2, 1);
+}

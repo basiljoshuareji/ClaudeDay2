@@ -1,0 +1,238 @@
+<div class="page">
+  <!-- Screen-reader announcements for actions that change the list silently. -->
+  <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">{{ announcement() }}</div>
+
+  <header class="head">
+    <div class="head__title">
+      @if (isAll()) {
+        <span class="head__icon" style="--section-color: var(--primary)"><app-icon name="layers" [size]="26" /></span>
+      } @else if (section(); as s) {
+        <span class="head__icon" [style.--section-color]="s.color"><app-icon [name]="s.icon" [size]="26" /></span>
+      } @else {
+        <span class="head__icon skeleton"></span>
+      }
+      <div class="head__text">
+        <h1>{{ heading() || 'Loading…' }}</h1>
+        <p class="head__sub">
+          {{ counts().total }} task{{ counts().total === 1 ? '' : 's' }} · {{ counts().pending }} open · {{ counts().completed }} done
+        </p>
+      </div>
+    </div>
+
+    <div class="head__actions">
+      @if (!isAll() && section(); as s) {
+        <button type="button" class="btn btn--icon" aria-label="Edit section" title="Edit section" (click)="editSection()">
+          <app-icon name="edit" />
+        </button>
+        @if (!s.isDefault) {
+          <button type="button" class="btn btn--icon" aria-label="Delete section" title="Delete section" (click)="deleteSection()">
+            <app-icon name="trash" />
+          </button>
+        }
+      }
+      <button type="button" class="btn btn--primary" (click)="openCreate()"><app-icon name="plus" /> Add task</button>
+    </div>
+
+    <app-progress-bar
+      class="head__progress"
+      [done]="counts().completed"
+      [total]="counts().total"
+      [color]="section()?.color ?? ''"
+      [label]="heading() + ' progress'"
+    />
+  </header>
+
+  <form class="quick card" (submit)="quickAdd($event)">
+    <label class="sr-only" for="quick-title">New task title</label>
+    <input
+      id="quick-title"
+      class="input quick__input"
+      placeholder="Add a task and press Enter…"
+      maxlength="200"
+      autocomplete="off"
+      [value]="quickTitle()"
+      (input)="quickTitle.set($any($event.target).value)"
+    />
+    @if (isAll()) {
+      <label class="sr-only" for="quick-section">Section for the new task</label>
+      <select id="quick-section" class="select quick__section" (change)="quickSection.set(+$any($event.target).value)">
+        @for (s of sections.sections(); track s.id) {
+          <option [value]="s.id" [selected]="(quickSection() ?? sections.sections()[0]?.id) === s.id">{{ s.name }}</option>
+        }
+      </select>
+    }
+    <button type="submit" class="btn btn--primary" [disabled]="!quickTitle().trim() || quickSaving()">Add</button>
+  </form>
+
+  <section class="toolbar" aria-label="Search, filter and sort tasks">
+    <div class="search">
+      <app-icon name="search" [size]="18" />
+      <input
+        type="search"
+        class="input"
+        placeholder="Search title or notes…"
+        aria-label="Search tasks"
+        [value]="searchText()"
+        (input)="onSearch($any($event.target).value)"
+      />
+    </div>
+
+    <div class="due-tabs" role="group" aria-label="Filter by due date">
+      @for (opt of [['', 'Any date'], ['Today', 'Today'], ['Upcoming', 'Upcoming'], ['Overdue', 'Overdue'], ['None', 'No date']]; track opt[0]) {
+        <button type="button" class="due-tab" [class.is-active]="due() === opt[0]" [attr.aria-pressed]="due() === opt[0]" (click)="due.set($any(opt[0]))">
+          {{ opt[1] }}
+        </button>
+      }
+    </div>
+
+    <div class="selects">
+      <select class="select" aria-label="Filter by status" [value]="status()" (change)="status.set($any($event.target).value)">
+        <option value="">Any status</option>
+        <option value="Pending">Pending</option>
+        <option value="InProgress">In progress</option>
+        <option value="Completed">Completed</option>
+      </select>
+      <select class="select" aria-label="Filter by priority" [value]="priority()" (change)="priority.set($any($event.target).value)">
+        <option value="">Any priority</option>
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+      </select>
+      <select class="select" aria-label="Filter by tag" [value]="tagId() ?? ''" (change)="setTag($any($event.target).value)">
+        <option value="">Any tag</option>
+        @for (tag of tagsStore.tags(); track tag.id) {
+          <option [value]="tag.id">{{ tag.name }}</option>
+        }
+      </select>
+      <div class="sort">
+        <select class="select" aria-label="Sort by" [value]="sortBy()" (change)="setSort($any($event.target).value)">
+          <option value="Manual">Manual order</option>
+          <option value="DueDate">Due date</option>
+          <option value="Priority">Priority</option>
+          <option value="Created">Date created</option>
+          <option value="Title">Title</option>
+        </select>
+        <button
+          type="button"
+          class="btn btn--icon"
+          [disabled]="sortBy() === 'Manual'"
+          [attr.aria-label]="'Sort direction: ' + (effectiveDir() === 'Asc' ? 'ascending' : 'descending') + '. Click to reverse.'"
+          (click)="toggleSortDir()"
+        >
+          <app-icon [name]="effectiveDir() === 'Asc' ? 'arrow-up' : 'arrow-down'" />
+        </button>
+      </div>
+    </div>
+
+    <div class="toolbar__row">
+      <button type="button" class="btn btn--sm" [attr.aria-pressed]="selectMode()" [class.btn--primary]="selectMode()" (click)="toggleSelectMode()">
+        <app-icon name="check-circle" [size]="16" /> {{ selectMode() ? 'Done selecting' : 'Select' }}
+      </button>
+      @if (selectMode() && items().length > 0) {
+        <label class="select-all">
+          <input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll($any($event.target).checked)" />
+          Select all {{ items().length }} shown
+        </label>
+      }
+      @if (activeFilterCount() > 0) {
+        <button type="button" class="btn btn--sm btn--ghost" (click)="clearFilters()"><app-icon name="x" [size]="16" /> Clear {{ activeFilterCount() }} filter{{ activeFilterCount() === 1 ? '' : 's' }}</button>
+      }
+      @if (canReorder()) {
+        <span class="hint-text"><app-icon name="grip" [size]="14" /> Drag to reorder</span>
+      }
+    </div>
+  </section>
+
+  @if (loadError(); as message) {
+    <div class="form-error retry" role="alert">
+      <span>{{ message }}</span>
+      <button type="button" class="btn btn--sm" (click)="reload()">Try again</button>
+    </div>
+  }
+
+  <div class="list-wrap" [attr.aria-busy]="loading()">
+    @if (!initialised()) {
+      <div class="skeletons" aria-label="Loading tasks" role="status">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <span class="skeleton"></span>
+        }
+      </div>
+    } @else if (items().length === 0 && !loadError()) {
+      @if (activeFilterCount() > 0) {
+        <app-empty-state icon="filter" title="No matching tasks" message="Nothing fits those filters. Try loosening them.">
+          <button type="button" class="btn" (click)="clearFilters()">Clear filters</button>
+        </app-empty-state>
+      } @else {
+        <app-empty-state
+          icon="sparkles"
+          [title]="isAll() ? 'Nothing on your plate' : 'No tasks in ' + heading() + ' yet'"
+          message="Add your first task above, or open the full form for notes, due dates, tags and a checklist."
+        >
+          <button type="button" class="btn btn--primary" (click)="openCreate()"><app-icon name="plus" /> Add a task</button>
+        </app-empty-state>
+      }
+    } @else {
+      <div
+        class="list"
+        role="list"
+        aria-label="Tasks"
+        cdkDropList
+        cdkDropListLockAxis="y"
+        [cdkDropListDisabled]="!canReorder()"
+        [class.is-dimmed]="loading()"
+        (cdkDropListDropped)="drop($event)"
+      >
+        @for (task of items(); track task.id) {
+          <app-task-item
+            cdkDrag
+            cdkDragBoundary=".list"
+            [cdkDragDisabled]="!canReorder()"
+            [attr.data-task-id]="task.id"
+            [task]="task"
+            [sections]="sections.sections()"
+            [showSection]="isAll()"
+            [selectMode]="selectMode()"
+            [selected]="selectedIds().has(task.id)"
+            [reorderable]="canReorder()"
+            (toggleComplete)="toggleComplete($event)"
+            (edit)="openEdit($event)"
+            (remove)="remove($event)"
+            (selectionChange)="onSelect($event.task, $event.checked)"
+            (move)="move($event)"
+            (reorderBy)="reorderBy($event.task, $event.direction)"
+            (toggleSubTask)="toggleSubTask($event)"
+            (addSubTask)="addSubTask($event)"
+          />
+        }
+      </div>
+
+      @if (remaining() > 0) {
+        <button type="button" class="btn load-more" [disabled]="loadingMore()" (click)="loadMore()">
+          {{ loadingMore() ? 'Loading…' : 'Load ' + remaining() + ' more' }}
+        </button>
+      }
+    }
+  </div>
+
+  @if (selectMode() && selectedCount() > 0) {
+    <div class="bulk card fade-in" role="region" aria-label="Bulk actions">
+      <span class="bulk__count" aria-live="polite">{{ selectedCount() }} selected</span>
+      <div class="bulk__buttons">
+        <button type="button" class="btn btn--sm" (click)="bulkComplete(true)"><app-icon name="check" [size]="16" /> Complete</button>
+        <button type="button" class="btn btn--sm" (click)="bulkComplete(false)"><app-icon name="undo" [size]="16" /> Reopen</button>
+        <button type="button" class="btn btn--sm btn--danger" (click)="bulkDelete()"><app-icon name="trash" [size]="16" /> Delete</button>
+        <button type="button" class="btn btn--sm btn--ghost" (click)="clearSelection()">Clear</button>
+      </div>
+    </div>
+  }
+</div>
+
+@if (formState(); as state) {
+  <app-task-form-dialog
+    [task]="state.task"
+    [sections]="sections.sections()"
+    [defaultSectionId]="sectionId()"
+    (saved)="onSaved()"
+    (closed)="closeForm()"
+  />
+}
