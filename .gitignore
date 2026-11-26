@@ -27,3 +27,6 @@ Thumbs.db
 # Secrets
 .env
 *.pfx
+
+# MCP server local overrides (may contain credentials)
+appsettings.local.json
