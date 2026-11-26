@@ -8,7 +8,8 @@ drag and drop. Five runtime-switchable **themes** are saved per user.
 |---|---|
 | **Backend** | C#, ASP.NET Core Web API (`net8.0`), EF Core 8, SQLite (SQL Server by config), JWT auth, Serilog, Swagger |
 | **Frontend** | Angular 22 (standalone components, signals, zoneless), Router, Reactive Forms, SCSS, Angular CDK drag-drop |
-| **Tests** | 69 backend tests (xUnit: service layer + HTTP integration), 73 frontend tests (Vitest) |
+| **MCP server** | `TodoMcpServer` (C# console, stdio): use the app from Claude Desktop. See [its README](backend/src/TodoMcpServer/README.md) |
+| **Tests** | 69 API tests (xUnit: service layer + HTTP integration), 78 MCP server tests (xUnit), 73 frontend tests (Vitest) |
 
 ## Project structure
 
@@ -30,9 +31,12 @@ drag and drop. Five runtime-switchable **themes** are saved per user.
 │   │   ├── Middleware/                        # global exception handler -> consistent error body
 │   │   ├── Exceptions/                        # NotFound / Conflict / BadRequest / Unauthorized
 │   │   └── Infrastructure/                    # options, claims helper, trash purge background service
-│   └── tests/TodoApp.Tests/
-│       ├── Services/                          # unit tests of every service (real SQLite in memory + real migrations)
-│       └── Integration/                       # WebApplicationFactory tests of the real HTTP pipeline
+│   ├── src/TodoMcpServer/                     # MCP server (stdio) that adapts Claude Desktop to the REST API
+│   └── tests/
+│       ├── TodoApp.Tests/
+│       │   ├── Services/                      # unit tests of every service (real SQLite in memory + real migrations)
+│       │   └── Integration/                   # WebApplicationFactory tests of the real HTTP pipeline
+│       └── TodoMcpServer.Tests/               # MCP server tests with a mocked HttpMessageHandler
 └── frontend/
     ├── angular.json  package.json  scripts/check-contrast.mjs
     └── src/
@@ -102,10 +106,16 @@ If you run the tool on a machine that only has a newer .NET runtime, prefix with
 ### Tests
 
 ```powershell
-cd backend;  dotnet test                              # 69 tests
+cd backend;  dotnet test                              # 69 API tests + 78 MCP server tests
 cd frontend; npm test -- --no-watch                   # 73 tests
 cd frontend; node scripts/check-contrast.mjs          # WCAG AA check of every theme palette
 ```
+
+### Use it from Claude Desktop (MCP)
+
+`backend/src/TodoMcpServer` is an MCP server that lets Claude Desktop add, list, update, complete and delete tasks by calling this
+API ("add 'fix the leaking tap' to my Home list, due Saturday, high priority"). Setup, the Claude Desktop config and
+troubleshooting are in [backend/src/TodoMcpServer/README.md](backend/src/TodoMcpServer/README.md).
 
 ### Production build
 
